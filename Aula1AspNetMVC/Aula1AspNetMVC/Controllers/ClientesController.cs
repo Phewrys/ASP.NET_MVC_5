@@ -15,7 +15,14 @@ namespace Aula1AspNetMVC.Controllers
     {
         private Aula1Context db = new Aula1Context();
 
+        [ValidateInput(false)]
+        public ContentResult Teste(int Id)
+        {
+            return Content(DateTime.Now.ToString());
+        }
+
         // GET: Clientes
+        [HttpGet]
         public ActionResult Index()
         {
             return View(db.Cliente.ToList());
@@ -47,10 +54,17 @@ namespace Aula1AspNetMVC.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Nome,SobreNome,DataCadastro")] Cliente cliente)
+        public ActionResult Create(Cliente cliente)
         {
             if (ModelState.IsValid)
             {
+                if(!cliente.Email.Contains(".br"))
+                {
+                    ModelState.AddModelError(String.Empty, "E-mail não pode ser internacional");
+                    return View(cliente);
+                }
+
+                cliente.DataCadastro = DateTime.Now;
                 db.Cliente.Add(cliente);
                 db.SaveChanges();
                 return RedirectToAction("Index");
